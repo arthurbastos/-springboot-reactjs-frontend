@@ -7,7 +7,7 @@ function Navbar(){
     return(
         <div className="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
             <div className="container">
-                <a href="https://bootswatch.com/" className="navbar-brand">Minhas Finanças</a>
+                <a className="navbar-brand">Minhas Finanças</a>
                 <button className="navbar-toggler" type="button" 
                         data-toggle="collapse" 
                         data-target="#navbarResponsive" 

@@ -5,7 +5,7 @@ import FormGroup from '../../components/form-group'
 import SelectMenu from '../../components/selectMenu'
 import LançamentosTable from './lancamentosTable'
 
-import LancamentoServico from '../../app/service/lancamentoService'
+import LancamentoService from '../../app/service/lancamentoService'
 import LocalStorageService from '../../app/service/localstorageService'
 
 import * as messages from '../../components/toastr'
@@ -27,7 +27,7 @@ class ConsultaLancamentos extends React.Component{
 
     constructor(){
         super();
-        this.service = new LancamentoServico()
+        this.service = new LancamentoService()
     }
 
     buscar = () =>{
@@ -50,7 +50,6 @@ class ConsultaLancamentos extends React.Component{
             .then(resposta => {
                 if(resposta.data.length === 0){
                     messages.mensagemAlert('Não a dados para esses filtros')
-                    return false;
                 }
                 this.setState({lancamentos: resposta.data})
             }).catch(error => {
@@ -59,7 +58,7 @@ class ConsultaLancamentos extends React.Component{
     }
 
     editar = (id) => {
-        console.log('editando o lançamento', id)
+        this.props.history.push(`/cadastra-lancamentos/${id}`)
     }
 
     abrirConfirmacao = (lancamento) => {
@@ -79,6 +78,27 @@ class ConsultaLancamentos extends React.Component{
                 lancamentos.splice(index, 1);
                 this.setState({lancamentos: lancamentos, showConfirmDialog: false})
                 messages.mensagemSucesso('Lançamento deletado com sucesso!')
+            }).catch(error => {
+                messages.mensagemErro('Ocorreu um erro ao tentar deletar o Lançamento')
+            })
+    }
+
+    preparaFormularioCadastro = () => {
+        this.props.history.push('/cadastra-lancamentos')
+    }
+
+    alterarStatus = (lancamento, status) => {
+        this.service
+            .alterarStatus(lancamento.id, status)
+            .then(response => {
+                const lancamentos = this.state.lancamentos;
+                const index = lancamentos.indexOf(lancamento);
+                if(index !== -1){
+                    lancamento['status'] = status;
+                    lancamentos[index] = lancamento
+                    this.setState({lancamento})
+                }
+                messages.mensagemSucesso('Status atualizado com sucesso!')
             }).catch(error => {
                 messages.mensagemErro('Ocorreu um erro ao tentar deletar o Lançamento')
             })
@@ -136,8 +156,16 @@ class ConsultaLancamentos extends React.Component{
                                             lista={tipos}/>
                             </FormGroup>
 
-                            <button onClick={this.buscar} type="button" className="btn btn-success">Buscar</button>
-                            <button type="button" className="btn btn-danger">Cadastrar</button>
+                            <button onClick={this.buscar} 
+                                    type="button" 
+                                    className="btn btn-success">
+                                    <i className="pi pi-search"></i> Buscar
+                            </button>
+                            <button onClick={this.preparaFormularioCadastro} 
+                                    type="button" 
+                                    className="btn btn-danger">
+                                    <i className="pi pi-plus"></i> Cadastrar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -147,7 +175,8 @@ class ConsultaLancamentos extends React.Component{
                         <div className="bs-component">
                             <LançamentosTable lancamentos={this.state.lancamentos} 
                                               editAction={this.editar}
-                                              deleteAction={this.abrirConfirmacao} />
+                                              deleteAction={this.abrirConfirmacao} 
+                                              alterarStatus={this.alterarStatus}/>
                         </div>
                     </div>
                 </div>
